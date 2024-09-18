@@ -169,14 +169,10 @@
             requestAnimationFrame(animate);
         }
 
-        // 點擊畫布時生成煙火或籃球
+        // 點擊畫布時生成煙火和籃球
         canvas.addEventListener("click", function(event) {
-            // 隨機選擇生成煙火或籃球
-            if (Math.random() > 0.5) {
-                createFirework(event.clientX, event.clientY);
-            } else {
-                createBasketball(event.clientX, event.clientY);
-            }
+            createFirework(event.clientX, event.clientY);  // 生成煙火
+            createBasketball(event.clientX, event.clientY); // 生成籃球
         });
 
         // 生成籃球
