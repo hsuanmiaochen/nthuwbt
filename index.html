@@ -9,14 +9,115 @@
             font-family: Arial, sans-serif;
             text-align: center;
             margin-top: 50px;
+            background-color: black; /* 背景為黑色，讓煙火更明顯 */
+            color: white;
         }
         h1 {
             color: #4CAF50;
+        }
+        canvas {
+            display: block;
+            margin: 0 auto;
+            background-color: black;
         }
     </style>
 </head>
 <body>
     <h1>教師節快樂！</h1>
     <p>感謝您對我們的教導與付出！</p>
+
+    <!-- 煙火動畫 -->
+    <canvas id="fireworksCanvas"></canvas>
+
+    <script>
+        // 獲取畫布元素並設置大小
+        const canvas = document.getElementById("fireworksCanvas");
+        const ctx = canvas.getContext("2d");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        // 煙火粒子類
+        class Particle {
+            constructor(x, y, color) {
+                this.x = x;
+                this.y = y;
+                this.color = color;
+                this.radius = Math.random() * 2 + 1;
+                this.speedX = Math.random() * 6 - 3;
+                this.speedY = Math.random() * 6 - 3;
+                this.alpha = 1;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.alpha -= 0.01;
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // 煙火類
+        class Firework {
+            constructor(x, y) {
+                this.x = x;
+                this.y = y;
+                this.particles = [];
+                this.createParticles();
+            }
+
+            createParticles() {
+                const colors = ['#ff4747', '#ffa200', '#47ff47', '#477eff', '#ff47d6'];
+                for (let i = 0; i < 100; i++) {
+                    const color = colors[Math.floor(Math.random() * colors.length)];
+                    this.particles.push(new Particle(this.x, this.y, color));
+                }
+            }
+
+            update() {
+                this.particles.forEach(particle => particle.update());
+                this.particles = this.particles.filter(particle => particle.alpha > 0);
+            }
+
+            draw() {
+                this.particles.forEach(particle => particle.draw());
+            }
+        }
+
+        const fireworks = [];
+
+        // 生成煙火
+        function createFirework(x, y) {
+            fireworks.push(new Firework(x, y));
+        }
+
+        // 動畫循環
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            fireworks.forEach((firework, index) => {
+                firework.update();
+                firework.draw();
+                if (firework.particles.length === 0) {
+                    fireworks.splice(index, 1);
+                }
+            });
+            requestAnimationFrame(animate);
+        }
+
+        // 點擊畫布時生成煙火
+        canvas.addEventListener("click", function(event) {
+            createFirework(event.clientX, event.clientY);
+        });
+
+        animate();
+    </script>
 </body>
 </html>
