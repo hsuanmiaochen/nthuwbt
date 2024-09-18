@@ -9,7 +9,7 @@
             font-family: Arial, sans-serif;
             text-align: center;
             margin-top: 50px;
-            background-color: black; /* 背景為黑色，讓煙火更明顯 */
+            background-color: black; /* 背景為黑色，讓煙火和籃球更明顯 */
             color: white;
         }
         h1 {
@@ -105,6 +105,8 @@
         // 動畫循環
         function animate() {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 更新煙火動畫
             fireworks.forEach((firework, index) => {
                 firework.update();
                 firework.draw();
@@ -112,6 +114,10 @@
                     fireworks.splice(index, 1);
                 }
             });
+            
+            // 更新籃球動畫
+            drawBasketball();
+
             requestAnimationFrame(animate);
         }
 
@@ -119,6 +125,40 @@
         canvas.addEventListener("click", function(event) {
             createFirework(event.clientX, event.clientY);
         });
+
+        // 籃球彈跳參數
+        let ballX = canvas.width / 2;
+        let ballY = canvas.height / 2;
+        let ballRadius = 30;
+        let ballSpeedX = 5;
+        let ballSpeedY = 5;
+        let gravity = 0.5;
+        let friction = 0.9;
+
+        // 繪製籃球
+        function drawBasketball() {
+            ctx.beginPath();
+            ctx.arc(ballX, ballY, ballRadius, 0, Math.PI * 2);
+            ctx.fillStyle = "#FFA500"; // 橙色籃球
+            ctx.fill();
+            ctx.closePath();
+
+            // 更新籃球位置
+            ballX += ballSpeedX;
+            ballY += ballSpeedY;
+
+            // 模擬重力
+            ballSpeedY += gravity;
+
+            // 碰撞偵測 (牆壁和地面)
+            if (ballX + ballRadius > canvas.width || ballX - ballRadius < 0) {
+                ballSpeedX = -ballSpeedX * friction;
+            }
+            if (ballY + ballRadius > canvas.height) {
+                ballY = canvas.height - ballRadius;
+                ballSpeedY = -ballSpeedY * friction;
+            }
+        }
 
         animate();
     </script>
