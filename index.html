@@ -15,9 +15,6 @@
         h1 {
             color: #4CAF50;
         }
-        h2 {
-            color: #fffdd0;
-        }
         canvas {
             display: block;
             margin: 0 auto;
@@ -27,7 +24,7 @@
 </head>
 <body>
     <h1>教師節快樂！</h1>
-    <h2>Happy Teacher's Day！</h2>
+    <h1>Happy Teacher's Day！</h1>
     <p>妙妙感謝您對我們這些年的教導與付出！</p>
     <p>希望今年一起共創佳績！</p>
     <p>祝福 平安健康 事事順心~</p>
@@ -105,6 +102,33 @@
             fireworks.push(new Firework(x, y));
         }
 
+        // 動畫循環
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 更新煙火動畫
+            fireworks.forEach((firework, index) => {
+                firework.update();
+                firework.draw();
+                if (firework.particles.length === 0) {
+                    fireworks.splice(index, 1);
+                }
+            });
+            
+            // 更新籃球動畫
+            basketballs.forEach(ball => {
+                ball.update();
+                ball.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        // 點擊畫布時生成煙火
+        canvas.addEventListener("click", function(event) {
+            createFirework(event.clientX, event.clientY);
+        });
+
         // 籃球類
         class Basketball {
             constructor(x, y, radius, speedX, speedY) {
@@ -144,40 +168,12 @@
             }
         }
 
-        const fireworks = [];
+        // 創建多個籃球
         const basketballs = [];
-
-        // 動畫循環
-        function animate() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            
-            // 更新煙火動畫
-            fireworks.forEach((firework, index) => {
-                firework.update();
-                firework.draw();
-                if (firework.particles.length === 0) {
-                    fireworks.splice(index, 1);
-                }
-            });
-            
-            // 更新籃球動畫
-            basketballs.forEach(ball => {
-                ball.update();
-                ball.draw();
-            });
-
-            requestAnimationFrame(animate);
-        }
-
-        // 點擊畫布時生成煙火和籃球
-        canvas.addEventListener("click", function(event) {
-            createFirework(event.clientX, event.clientY);  // 生成煙火
-            createBasketball(event.clientX, event.clientY); // 生成籃球
-        });
-
-        // 生成籃球
-        function createBasketball(x, y) {
+        for (let i = 0; i < 5; i++) {
             const radius = 30;
+            const x = Math.random() * (canvas.width - radius * 2) + radius;
+            const y = Math.random() * (canvas.height - radius * 2) + radius;
             const speedX = (Math.random() - 0.5) * 10;
             const speedY = (Math.random() - 0.5) * 10;
             basketballs.push(new Basketball(x, y, radius, speedX, speedY));
