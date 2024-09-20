@@ -15,6 +15,9 @@
         h1 {
             color: #4CAF50;
         }
+        h2 {
+            color: #fff197;
+        }
         canvas {
             display: block;
             margin: 0 auto;
@@ -24,10 +27,14 @@
 </head>
 <body>
     <h1>教師節快樂！</h1>
-    <h1>Happy Teacher's Day！</h1>
+    <h2>Happy Teacher's Day！</h2>
     <p>妙妙感謝您對我們這些年的教導與付出！</p>
     <p>希望今年一起共創佳績！</p>
     <p>祝福 平安健康 事事順心~</p>
+    <p>(點擊畫面會有煙花出現喔!)</p>
+    
+    <img src="帳戶.jpg" alt="教師節圖片" style="width: 100px; height: auto; margin: 5px 0;">
+    <p>(如果覺得妙妙不錯或網頁不錯可儲存QRcode斗內窩優~~~)</p>
 
     <!-- 煙火動畫 -->
     <canvas id="fireworksCanvas"></canvas>
@@ -125,9 +132,16 @@
         }
 
         // 點擊畫布時生成煙火
+        //canvas.addEventListener("click", function(event) {
+        //    createFirework(event.clientX, event.clientY);
+        //});
         canvas.addEventListener("click", function(event) {
-            createFirework(event.clientX, event.clientY);
+        const rect = canvas.getBoundingClientRect();
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        createFirework(x, y);
         });
+
 
         // 籃球類
         class Basketball {
@@ -170,7 +184,7 @@
 
         // 創建多個籃球
         const basketballs = [];
-        for (let i = 0; i < 5; i++) {
+        for (let i = 0; i < 8; i++) {
             const radius = 30;
             const x = Math.random() * (canvas.width - radius * 2) + radius;
             const y = Math.random() * (canvas.height - radius * 2) + radius;
