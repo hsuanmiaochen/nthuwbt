@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Team Grouping with Restrictions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+        }
+        .container {
+            width: 50%;
+            margin: auto;
+            padding: 20px;
+            text-align: center;
+        }
+        .team-member {
+            display: inline-block;
+            margin: 5px;
+        }
+        .groups {
+            margin-top: 20px;
+            text-align: left;
+        }
+        button {
+            margin-top: 10px;
+        }
+        .output-container {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+        }
+        .groups, .count-output {
+            width: 48%;
+        }
+        table {
+            width: 100%;
+            margin-top: 20px;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Random Team Grouping</h1>
+        <!-- <p>Select who is absent today:</p> -->
+        <div id="teamMembers"></div>
+        <br>
+        <label for="groupSize"># per group: </label>
+        <input type="number" id="groupSize" value="5" min="2" max="10">
+        <br><br>
+        <input type="number" id="groupCount" placeholder="How many groups to generate" min="1">
+        <br><br>
+        <button onclick="generateGroups()">Generate Groups</button>
+        <div class="output-container">
+            <div id="output" class="groups"></div>
+            <div id="countOutput" class="count-output"></div>
+        </div>
+    </div>
+
+    <script>
+        // 預設隊員列表
+        const members = ['慧心', '妙妙', '美甲', 'Momo', '拉麵', '小魚', '太郎', '焦糖', '小玉', '小柴', '小梁', '金菇', '柏卉', '1+', 'Tanisha', '新來的1號', '新來的2號'];
+
+        // 初始化頁面上的隊員選項
+        const teamMembersDiv = document.getElementById('teamMembers');
+        members.forEach((member, index) => {
+            teamMembersDiv.innerHTML += `
+                <label class="team-member">
+                    <input type="checkbox" id="member${index}" checked> ${member}
+                </label>
+            `;
+        });
+
+        // 隨機分組的函數
+        function generateGroups() {
+            const presentMembers = [];
+
+            // 檢查每個隊員是否出席（選取被勾選的隊員）
+            members.forEach((member, index) => {
+                const checkbox = document.getElementById(`member${index}`);
+                if (checkbox.checked) {
+                    presentMembers.push(member);
+                }
+            });
+
+            // 取得每組的人數
+            const membersPerGroup = parseInt(document.getElementById('groupSize').value);
+
+            // 取得要生成的組數
+            const groupCount = parseInt(document.getElementById('groupCount').value);
+
+            // 檢查是否有輸入有效的組數與出席隊員
+            if (isNaN(groupCount) || groupCount < 1) {
+                alert('Please enter a valid number of groups.');
+                return;
+            }
+
+            // 檢查是否有足夠的隊員參加
+            if (presentMembers.length < membersPerGroup) {
+                alert('Not enough members to form a group.');
+                return;
+            }
+
+            // 用來計算每個人出現的次數
+            const appearanceCount = {};
+            presentMembers.forEach(member => {
+                appearanceCount[member] = 0;
+            });
+
+            // 隨機分組
+            let groups = [];
+            let roundMembers = new Set(); // 用來追蹤這一輪出現的成員
+
+            for (let i = 0; i < groupCount; i++) {
+                let group = [];
+                
+                // 每組的隨機選取成員
+                while (group.length < membersPerGroup) {
+                    const randomIndex = Math.floor(Math.random() * presentMembers.length);
+                    const selectedMember = presentMembers[randomIndex];
+
+                    // 檢查選取的成員是否符合規則： 
+                    // 1. 該成員不在當前組內 
+                    // 2. 該成員在當前輪中未出現
+                    if (!group.includes(selectedMember) && !roundMembers.has(selectedMember)) {
+                        group.push(selectedMember);
+                        roundMembers.add(selectedMember); // 記錄當前選中的成員
+                        appearanceCount[selectedMember]++; // 計數器 +1
+                    }
+
+                    // 如果這一輪所有成員都已出現過，則結束當前組的生成
+                    if (roundMembers.size === presentMembers.length) {
+                        break; // 跳出當前的while循環
+                    }
+                }
+
+                // 如果分組完成後人數不足，則隨機遞補
+                while (group.length < membersPerGroup) {
+                    // 找出出現次數最少的成員
+                    const leastAppearedMembers = presentMembers.filter(member => appearanceCount[member] === Math.min(...Object.values(appearanceCount)));
+                    const randomIndex = Math.floor(Math.random() * leastAppearedMembers.length);
+                    const selectedMember = leastAppearedMembers[randomIndex];
+
+                    // 檢查選取的成員是否符合規則：
+                    if (!group.includes(selectedMember)) {
+                        group.push(selectedMember);
+                        appearanceCount[selectedMember]++; // 計數器 +1
+                    }
+                }
+
+                groups.push(group);
+                
+                // 檢查是否所有成員都已出現，若是則準備進入下一輪
+                if (roundMembers.size === presentMembers.length) {
+                    roundMembers.clear(); // 清空集合，準備下一輪
+                }
+            }
+
+            // 顯示分組結果
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = '';
+            groups.forEach((group, index) => {
+                outputDiv.innerHTML += `<h3>Group ${index + 1}</h3><p>${group.join(', ')}</p>`;
+            });
+
+            
+            // 顯示每個成員出現次數
+            const countOutputDiv = document.getElementById('countOutput');
+            // 添加標題
+            countOutputDiv.innerHTML = '<h3>Member Appearance Count:</h3>';
+
+            for (let member in appearanceCount) {
+                // 直接顯示成員名稱及其出現次數
+                countOutputDiv.innerHTML += `${member} ${appearanceCount[member]}<br>`;
+            }
+
+
+
+        }
+    </script>
+</body>
+</html>
